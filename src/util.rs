@@ -1,6 +1,5 @@
-// ============================
-//            TYPES
-// ============================
+use std::ops::Sub;
+use std::fmt;
 
 // block is just a string. Could do something more complicated but I would have to update it every
 // new version. I made it a type in case I change my mind later.
@@ -88,7 +87,7 @@ impl Groupable for i32 {
 //           STRUCTS
 // ============================
 
-#[derive(Eq)]
+#[derive(Eq, Debug)]
 pub struct Point2D {
     // max x and z values are ~30 million either way so this is plenty
     pub x: i32, 
@@ -98,6 +97,24 @@ pub struct Point2D {
 impl PartialEq for Point2D {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.z == other.z
+    }
+}
+
+impl Sub for Point2D {
+    type Output = Self;
+
+    // takes itself and another struct of TYPE self
+    fn sub(self, other: Self) -> Self::Output {
+        Point2D {
+            x: self.x - other.x,
+            z: self.z - other.z,
+        }
+    }
+}
+
+impl fmt::Display for Point2D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.z)
     }
 }
 
@@ -130,9 +147,13 @@ impl Point2D {
     pub fn as_coord(&self) -> Point2D {
         Point2D {x: self.x * CHUNK_SIZE, z: self.z * CHUNK_SIZE }
     }
+
+    pub fn to_str(&self) -> String {
+        format!("({}, {})", self.x, self.z)
+    }
 }
 
-#[derive(Eq)]
+#[derive(Eq, Debug)]
 pub struct Point3D {
     pub x: i32,
     pub y: i32,
@@ -142,6 +163,12 @@ pub struct Point3D {
 impl PartialEq for Point3D {
     fn eq(&self, other: &Self) -> bool {
         self.x == other.x && self.y == other.y && self.z == other.z
+    }
+}
+
+impl fmt::Display for Point3D {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
 
@@ -173,6 +200,10 @@ impl Point3D {
     **/
     pub fn as_coord(&self) -> Point3D {
         self.to_2d().as_coord().to_3d(self.y)
+    }
+
+    pub fn to_str(&self) -> String {
+        format!("({}, {})", self.x, self.z)
     }
 }
 
