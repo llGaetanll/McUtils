@@ -8,7 +8,7 @@ fn test_max() {
     // load slime matrix
     let slime_mat = SlimeMat::load("s1.txt");
 
-    println!("Slime Mat to string:\n{}", slime_mat);
+    // println!("Slime Mat to string:\n{}", slime_mat);
 
     assert_eq!(slime_mat.p.x, -62);
     assert_eq!(slime_mat.p.z, -62);

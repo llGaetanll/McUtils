@@ -14,8 +14,16 @@ pub mod util;
 
 
 /**
- * Contains helper functions to abstractr away in-game commands
+ * Contains helper functions to abstract away in-game commands
  */
 pub mod cmd;
 
+/**
+ * Contains all functions dealing with slime chunks
+ */
 pub mod slime;
+
+/**
+ * Testing reading nbt
+ */
+pub mod nbt;
