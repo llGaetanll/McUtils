@@ -24,23 +24,23 @@ pub const SHULKER_SLOTS: i32 = CHEST_SLOTS;
 pub const CHEST_SLOTS: i32 = 27;
 
 //                                  full stack, full shulker, full DC of shulker
-pub const SPACE_GROUP: [i32; 3] =   [STACK_SIZE, SHULKER_SLOTS, 2 * CHEST_SLOTS];
+pub const SPACE_DENOM: [i32; 3] =   [STACK_SIZE, SHULKER_SLOTS, 2 * CHEST_SLOTS];
 //                                  seconds, minutes, days, months, years
-pub const TIME_GROUP: [i32; 5] =    [60, 60, 24, 30, 12];
+pub const TIME_DENOM: [i32; 5] =    [60, 60, 24, 30, 12];
 
 // ============================
 //           TRAITS
 // ============================
 
-pub trait Groupable {
-    fn to_space(&self) -> Vec<i32>;
-    fn to_time(&self) -> Vec<i32>;
+pub trait Denominable {
+    fn to_space(&self) -> String;
+    fn to_time(&self) -> String;
 }
 
 /**
 * returns a grouped collection (in to out) given a collection and a number n
 */
-fn to_group(col: Vec<i32>, n: i32) -> Vec<i32> {
+fn to_denom(col: Vec<i32>, n: i32) -> Vec<i32> {
     // create cumulative collection
     let mut cum_col = vec![];
     let mut t = 1;
@@ -67,19 +67,65 @@ fn to_group(col: Vec<i32>, n: i32) -> Vec<i32> {
     grouped
 }
 
-impl Groupable for i32 {
+impl Denominable for i32 {
     /**
     * returns a list representating the space necessary to store the number as a quantity of items
     **/
-    fn to_space(&self) -> Vec<i32> {
-        to_group(SPACE_GROUP.to_vec(), *self)
+    fn to_space(&self) -> String {
+        let units = ["item", "stack", "Shulker", "Shulker Double Chest"];
+        let denom = to_denom(SPACE_DENOM.to_vec(), *self);
+
+        let mut quants: Vec<String> = Vec::new();
+        for (i, &quant) in denom.iter().rev().enumerate() {
+            if quant == 0 {
+                continue
+            }
+
+            let mut unit = units[i].to_owned();
+            if quant != 1 {
+                unit.push('s');
+            }
+
+            quants.push(format!("{} {}", quant, unit));
+        }
+
+        // edge case
+        if quants.len() == 0 {
+            quants.push("0 items".to_owned());
+        }
+
+        quants.reverse();
+        quants.join(", ")
     }
 
     /**
     * returns a list representating a time given a number of seconds
     **/
-    fn to_time(&self) -> Vec<i32> {
-        to_group(TIME_GROUP.to_vec(), *self)
+    fn to_time(&self) -> String {
+        let units = ["second", "minute", "hour", "day", "month", "year"];
+        let denom = to_denom(TIME_DENOM.to_vec(), *self);
+
+        let mut quants: Vec<String> = Vec::new();
+        for (i, &quant) in denom.iter().rev().enumerate() {
+            if quant == 0 {
+                continue
+            }
+
+            let mut unit = units[i].to_owned();
+            if quant != 1 {
+                unit.push('s');
+            }
+
+            quants.push(format!("{} {}", quant, unit));
+        }
+
+        // edge case
+        if quants.len() == 0 {
+            quants.push("0 seconds".to_owned());
+        }
+
+        quants.reverse();
+        quants.join(", ")
     }
 }
 
@@ -123,7 +169,7 @@ impl Point2D {
     * returns a Point3D from a Point2D given a y coordinate
     **/
     pub fn to_3d(&self, y: i32) -> Point3D {
-        Point3D { x: self.x, y: y, z: self.z }
+        Point3D { x: self.x, y, z: self.z }
     }
 
     /**

@@ -15,5 +15,5 @@ pub fn disp(file: File) {
 
     // write data to file
     let mut output = File::create("output.txt").unwrap();
-    write!(output, "{}", &string);
+    write!(output, "{}", &string).expect("Could not write output file");
 }

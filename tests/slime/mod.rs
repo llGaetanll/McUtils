@@ -19,11 +19,9 @@ fn test_max() {
     assert_eq!(slime_perim.count, 22);
     assert_eq!(slime_perim.c1, Point2D{x: 121, z: 150});
     assert_eq!(slime_perim.c2, Point2D{x: 131, z: 160});
-
-    assert_eq!(true, false);
 }
 
-#[test]
-fn test_rank() {
-    assert_eq!(true, true);
-}
+// #[test]
+// fn test_rank() {
+//     todo!()
+// }
