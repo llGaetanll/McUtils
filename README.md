@@ -30,3 +30,30 @@ recommend that you use it as it lacks a lot of structure at the moment.
   - `walls_2d`: Generates 1 high walls
   - `walls_3d`: Generates walls from bottom to top of the world
   - `chain`: chains multiple commands into a single command block
+
+
+# Ideas
+
+## Slime Module
+These are the functions that I would like to build
+
+- `private is_slime_chunk(seed, chunk_x, chunk_y) -> bool`: returns `True` if the chunk
+  is a slime chunk.
+
+- `top_p(seed, p, center, chunk_rad, search_rad) -> list?`: returns a descending
+  list of the best places in the world to make a slime farm given a radius for
+  search and for perimeter (both in chunks). Also returns `p` value.
+
+  This should be multithreaded for max performance.
+
+In there somewhere should be a function that prefers long patterns of slime
+chunks since those farms are usually nicer to build. Maybe use a vertical filter
+convolution?
+
+## Witch module?
+Now that we have `java_random` maybe this is manageable?
+
+Could find potential locations for quad/triple witch huts in the world.
+
+## Flower module?
+Find the optimal location to build a flower forest farm minimizing for area.
