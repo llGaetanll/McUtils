@@ -23,6 +23,7 @@ pub const STACK_SIZE: i32 = 64;
 pub const SHULKER_SLOTS: i32 = CHEST_SLOTS;
 pub const CHEST_SLOTS: i32 = 27;
 
+// TODO: change to hashmap of string: i32 where the string is the name of unit
 //                                  full stack, full shulker, full DC of shulker
 pub const SPACE_DENOM: [i32; 3] =   [STACK_SIZE, SHULKER_SLOTS, 2 * CHEST_SLOTS];
 //                                  seconds, minutes, days, months, years
