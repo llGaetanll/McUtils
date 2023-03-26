@@ -74,6 +74,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "java_random"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "79d7bc77998e63629a8512d8c9a60da5a56c15c14fff24ca5b33000127cb8272"
+
+[[package]]
 name = "libc"
 version = "0.2.112"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -85,6 +91,7 @@ version = "0.1.0"
 dependencies = [
  "fastnbt",
  "flate2",
+ "java_random",
  "regex",
 ]
 
