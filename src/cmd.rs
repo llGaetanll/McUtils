@@ -64,6 +64,7 @@ pub fn walls_3d(c: &Point2D, sidelength: i32, block: &Block) -> Vec<Command> {
     ];
 
     for i in 0..verts.len() {
+        // FIXME: bottom and top of the world have changed, use variables
         cmds.push(fill(&verts[i].to_3d(0), &verts[(i + 1) % 4].to_3d(255), block, None));
     }
 
