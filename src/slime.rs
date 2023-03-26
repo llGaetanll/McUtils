@@ -122,8 +122,8 @@ impl SlimeMat {
         // create struct
         let slime_mat = SlimeMat{
             p: point,
-            seed: seed,
-            mat: mat
+            seed,
+            mat
         };
 
         slime_mat
@@ -165,8 +165,8 @@ impl SlimeMat {
         // create struct
         let slime_mat = SlimeMat {
             p: point,
-            seed: seed,
-            mat: mat
+            seed,
+            mat
         };
 
         slime_mat
