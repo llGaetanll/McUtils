@@ -74,10 +74,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "java_random"
-version = "0.1.7"
+name = "java-rand"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "79d7bc77998e63629a8512d8c9a60da5a56c15c14fff24ca5b33000127cb8272"
+checksum = "2007b51b83dc078bc08617dab8f41d7abd61bce0e7732f79e1d01219bf0add80"
 
 [[package]]
 name = "libc"
@@ -91,7 +91,8 @@ version = "0.1.0"
 dependencies = [
  "fastnbt",
  "flate2",
- "java_random",
+ "java-rand",
+ "num-traits",
  "regex",
 ]
 
@@ -108,6 +109,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a92518e98c078586bc6c934028adcca4c92a53d6a958196de835170a01d84e4b"
 dependencies = [
  "adler",
+ "autocfg",
+]
+
+[[package]]
+name = "num-traits"
+version = "0.2.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "39e3200413f237f41ab11ad6d161bc7239c84dcb631773ccd7de3dfe4b5c267c"
+dependencies = [
  "autocfg",
 ]
 

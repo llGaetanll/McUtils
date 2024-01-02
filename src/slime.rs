@@ -1,14 +1,38 @@
-use std::collections::BinaryHeap;
-use std::io::prelude::*;
 use std::cmp::Ordering;
-use std::io::BufReader;
-use std::fs::File;
+use std::collections::BinaryHeap;
 use std::env;
 use std::fmt;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::BufReader;
 
 use regex::Regex;
 
 use crate::util::Point2D;
+
+/// Determines if a chunk is a slime chunk for a given `seed`, `x` chunk coordinate, and `y` chunk
+/// coordinate.
+///
+/// NOTE: these are NOT world coordinates. To get chunk coordinates (`x'`, `y'`) from world
+/// coordinates (`x`, `y`), integer divide `x` and `y`.
+pub fn is_slimechunk(seed: i64, x: i32, z: i32) -> bool {
+    let a = x.wrapping_mul(x).wrapping_mul(0x4c1906);
+    let b = x.wrapping_mul(0x5ac0db);
+    let c = z.wrapping_mul(z);
+    let d = z.wrapping_mul(0x5f24f);
+
+    let seed = seed
+        .wrapping_add(a as i64)
+        .wrapping_add(b as i64)
+        .wrapping_add((c as i64) * 0x4307a7i64)
+        .wrapping_add(d as i64);
+
+    let seed = seed ^ 0x3ad8025fi64;
+    let seed = seed as u64;
+
+    let mut rnd = java_rand::Random::new(seed);
+    rnd.next_i32_bound(10) == 0
+}
 
 type CMat = Vec<Vec<i32>>;
 
@@ -16,19 +40,17 @@ type CMat = Vec<Vec<i32>>;
 pub struct SlimeMat {
     pub p: Point2D,
     pub seed: String, // java long
-    pub mat: Vec<Vec<bool>>
+    pub mat: Vec<Vec<bool>>,
 }
 // open file given filename
 fn open(filename: &str) -> File {
     // gen absolute path
-    let mut path = env::current_dir()
-        .expect(&format!("Error getting current directory."));
-    
+    let mut path = env::current_dir().expect(&format!("Error getting current directory."));
+
     path.extend(["tests", "slime", filename]);
 
     // load file
-    let file = File::open(&path)
-        .expect(&format!("Error opening file {}.", path.display()));
+    let file = File::open(&path).expect(&format!("Error opening file {}.", path.display()));
 
     file
 }
@@ -37,24 +59,36 @@ fn get_meta(meta_line: &str) -> (Point2D, String) {
     // extract fields
     let meta_regex = Regex::new(r"x: (-?\d+), z: (-?\d+), s: (-?\d+)").unwrap();
     let meta_fields = meta_regex.captures(&meta_line).unwrap();
-    
+
     (
         Point2D {
-            x: meta_fields.get(1).expect("x coordinate not found").as_str().parse()
+            x: meta_fields
+                .get(1)
+                .expect("x coordinate not found")
+                .as_str()
+                .parse()
                 .expect("invalid coordinate"),
 
-            z: meta_fields.get(2).expect("z coordinate not found").as_str().parse()
+            z: meta_fields
+                .get(2)
+                .expect("z coordinate not found")
+                .as_str()
+                .parse()
                 .expect("invalid coordinate"),
         },
-        meta_fields.get(3).expect("seed not found").as_str().parse()
-                .expect("invalid seed")
+        meta_fields
+            .get(3)
+            .expect("seed not found")
+            .as_str()
+            .parse()
+            .expect("invalid seed"),
     )
 }
 
 impl SlimeMat {
     /**
-    * returns the cumulative matrix for the given slime matrix
-    */
+     * returns the cumulative matrix for the given slime matrix
+     */
     fn to_c_mat(&self) -> CMat {
         let mat = &self.mat;
         let width = mat.len();
@@ -66,7 +100,7 @@ impl SlimeMat {
             for j in 1..=height {
                 c_mat[i][j] = c_mat[i - 1][j] + c_mat[i][j - 1] - c_mat[i - 1][j - 1];
 
-                if mat[i-1][j-1] {
+                if mat[i - 1][j - 1] {
                     c_mat[i][j] += 1;
                 }
             }
@@ -76,9 +110,9 @@ impl SlimeMat {
     }
 
     /**
-    * returns the slime matrix struct for a given slime file.
-    * The path should be absolute
-    */
+     * returns the slime matrix struct for a given slime file.
+     * The path should be absolute
+     */
     pub fn buf_load(&self, filename: &str) -> SlimeMat {
         // size of buffer when reading text file
         const BUFSIZE: usize = 2048;
@@ -120,10 +154,10 @@ impl SlimeMat {
         }
 
         // create struct
-        let slime_mat = SlimeMat{
+        let slime_mat = SlimeMat {
             p: point,
             seed,
-            mat
+            mat,
         };
 
         slime_mat
@@ -166,15 +200,15 @@ impl SlimeMat {
         let slime_mat = SlimeMat {
             p: point,
             seed,
-            mat
+            mat,
         };
 
         slime_mat
     }
 
     /**
-    * returns the absolute densest slime chunk area given a slime chunk matrix, a width, and a height
-    */
+     * returns the absolute densest slime chunk area given a slime chunk matrix, a width, and a height
+     */
     pub fn max_chunks(&self, width: usize, height: usize) -> SlimePerim {
         // compute cumulative matrix
         let c_mat = self.to_c_mat();
@@ -189,13 +223,20 @@ impl SlimeMat {
         // find most dense area
         for i in width + 1..c_mat.len() {
             for j in height + 1..c_mat.len() {
-                let slime_count = c_mat[i][j] - c_mat[i - width][j] - c_mat[i][j - height] + c_mat[i - width][j - height];
+                let slime_count = c_mat[i][j] - c_mat[i - width][j] - c_mat[i][j - height]
+                    + c_mat[i - width][j - height];
 
                 if slime_count > perim.count {
                     perim = SlimePerim {
                         count: slime_count,
-                        c1: Point2D { x: (i - width) as i32 - self.p.x, z: (j - height) as i32 - self.p.z },
-                        c2: Point2D { x: i as i32 - self.p.x, z: j as i32 - self.p.z }
+                        c1: Point2D {
+                            x: (i - width) as i32 - self.p.x,
+                            z: (j - height) as i32 - self.p.z,
+                        },
+                        c2: Point2D {
+                            x: i as i32 - self.p.x,
+                            z: j as i32 - self.p.z,
+                        },
                     };
                 }
             }
@@ -204,11 +245,15 @@ impl SlimeMat {
         perim
     }
 
-
     /**
-    * returns a ranking of the densest slime chunk areas given a slime chunk matrix, a width, a height, a ranking size
-    */
-    pub fn max_chunk_rank(&self, width: usize, height: usize, size: usize) -> BinaryHeap<SlimePerim> {
+     * returns a ranking of the densest slime chunk areas given a slime chunk matrix, a width, a height, a ranking size
+     */
+    pub fn max_chunk_rank(
+        &self,
+        width: usize,
+        height: usize,
+        size: usize,
+    ) -> BinaryHeap<SlimePerim> {
         // compute cumulative matrix
         let c_mat = self.to_c_mat();
 
@@ -217,12 +262,19 @@ impl SlimeMat {
 
         for i in width + 1..c_mat.len() {
             for j in height + 1..c_mat.len() {
-                let slime_count = c_mat[i][j] - c_mat[i - width][j] - c_mat[i][j - height] + c_mat[i - width][j - height];
+                let slime_count = c_mat[i][j] - c_mat[i - width][j] - c_mat[i][j - height]
+                    + c_mat[i - width][j - height];
 
                 let perim = SlimePerim {
                     count: slime_count,
-                    c1: Point2D { x: (i - width) as i32, z: (j - height) as i32 },
-                    c2: Point2D { x: i as i32, z: j as i32 }
+                    c1: Point2D {
+                        x: (i - width) as i32,
+                        z: (j - height) as i32,
+                    },
+                    c2: Point2D {
+                        x: i as i32,
+                        z: j as i32,
+                    },
                 };
 
                 heap.push(perim);
@@ -233,8 +285,8 @@ impl SlimeMat {
     }
 
     /**
-    * returns a strigified matrix alongside any metadata.
-    */
+     * returns a strigified matrix alongside any metadata.
+     */
     pub fn to_str(&self) -> String {
         let mut str_mat = format!("x: {}, z: {}, s: {}", &self.p.x, &self.p.z, &self.seed);
 
@@ -281,10 +333,13 @@ impl fmt::Display for SlimeMat {
             str_mat = format!("{}\n{}", str_mat, line);
         }
 
-        write!(f, "x: {}, z: {}, s: {}{}", &self.p.x, &self.p.z, &self.seed, str_mat)
+        write!(
+            f,
+            "x: {}, z: {}, s: {}{}",
+            &self.p.x, &self.p.z, &self.seed, str_mat
+        )
     }
 }
-
 
 #[derive(Eq)]
 pub struct SlimePerim {
@@ -297,7 +352,11 @@ pub struct SlimePerim {
 
 impl fmt::Display for SlimePerim {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "count: {}, from: {}, to: {}", &self.count, &self.c1, &self.c2)
+        write!(
+            f,
+            "count: {}, from: {}, to: {}",
+            &self.count, &self.c1, &self.c2
+        )
     }
 }
 
