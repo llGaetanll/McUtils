@@ -2,7 +2,7 @@
 /// coordinate.
 ///
 /// NOTE: these are NOT world coordinates. To get chunk coordinates (`x'`, `y'`) from world
-/// coordinates (`x`, `y`), integer divide `x` and `y`.
+/// coordinates (`x`, `y`), integer divide `x` and `y` by 16.
 pub fn is_slimechunk(seed: i64, x: i32, z: i32) -> bool {
     let a = x.wrapping_mul(x).wrapping_mul(0x4c1906);
     let b = x.wrapping_mul(0x5ac0db);
@@ -16,9 +16,8 @@ pub fn is_slimechunk(seed: i64, x: i32, z: i32) -> bool {
         .wrapping_add(d as i64);
 
     let seed = seed ^ 0x3ad8025fi64;
-    let seed = seed as u64;
 
-    let mut rnd = java_rand::Random::new(seed);
+    let mut rnd = java_rand::Random::new(seed as u64);
     rnd.next_i32_bound(10) == 0
 }
 
