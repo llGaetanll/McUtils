@@ -23,7 +23,7 @@ pub fn is_slimechunk(seed: i64, x: i32, z: i32) -> bool {
 
 #[cfg(test)]
 mod test {
-    use crate::slime::is_slimechunk;
+    use crate::rand::is_slimechunk;
 
     #[test]
     fn test_slimechunk_1() {

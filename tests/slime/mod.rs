@@ -1,27 +1,125 @@
-extern crate mc_utils;
+use mc_utils::rand::is_slimechunk;
 
-use mc_utils::slime::SlimeMat;
-use mc_utils::util::Point2D;
+use ndarray::Array1;
+use ndarray::Array2;
 
-#[test]
-fn test_max() {
-    // load slime matrix
-    let slime_mat = SlimeMat::load("s1.txt");
+use regex::Regex;
+use std::fs;
+use std::io;
+use std::io::ErrorKind;
+use std::io::Result;
+use std::path::PathBuf;
 
-    // println!("Slime Mat to string:\n{}", slime_mat);
+#[derive(Debug)]
+struct SlimeMat {
+    // the x chunk coordinate of the top left of the file
+    x: i32,
 
-    assert_eq!(slime_mat.p.x, -62);
-    assert_eq!(slime_mat.p.z, -62);
+    // the z chunk coordinate of the top left of the file
+    z: i32,
 
-    // find the most slime abundant 10x10 chunk area within the matrix
-    let slime_perim = slime_mat.max_chunks(10, 10);
+    seed: i64,
 
-    assert_eq!(slime_perim.count, 22);
-    assert_eq!(slime_perim.c1, Point2D{x: 121, z: 150});
-    assert_eq!(slime_perim.c2, Point2D{x: 131, z: 160});
+    slime_chunks: Array2<bool>,
 }
 
-// #[test]
-// fn test_rank() {
-//     todo!()
-// }
+fn load_file(name: &str) -> io::Result<SlimeMat> {
+    let path: PathBuf = ["tests", "slime", name].iter().collect();
+
+    let file = fs::read_to_string(path)?;
+    let mut lines = file.lines();
+
+    let meta_line = lines
+        .next()
+        .ok_or(io::Error::new(ErrorKind::Other, "missing meta line"))?;
+    let meta_regex = Regex::new(r"x: (-?\d+), z: (-?\d+), s: (-?\d+)").unwrap();
+    let meta_fields = meta_regex.captures(meta_line).unwrap();
+
+    let x: i32 = meta_fields
+        .get(1)
+        .expect("x coordinate not found")
+        .as_str()
+        .parse()
+        .expect("invalid coordinate");
+
+    let z: i32 = meta_fields
+        .get(2)
+        .expect("z coordinate not found")
+        .as_str()
+        .parse()
+        .expect("invalid coordinate");
+
+    let seed: i64 = meta_fields
+        .get(3)
+        .expect("seed not found")
+        .as_str()
+        .parse()
+        .expect("invalid seed");
+
+    let (width, height) = {
+        let mut lines = lines.clone();
+        let width = lines.next().unwrap().len();
+        let height = lines.count() + 1; // since we consumed a line getting the width
+
+        (width, height)
+    };
+
+    let slime_chunks = lines.flat_map(|line| {
+        line.chars().map(|c| match c {
+            '1' => true,
+            '0' => false,
+            _ => panic!("invalid slime chunk matrix"),
+        })
+    });
+
+    let slime_chunks: Array2<bool> = Array1::from_iter(slime_chunks)
+        .into_shape((width, height))
+        .unwrap();
+
+    Ok(SlimeMat { x, z, seed, slime_chunks })
+}
+
+#[test]
+fn slime_chunk_s1() -> Result<()> {
+    let mat = load_file("s1.txt")?;
+    let (x, z, seed) = (mat.x, mat.z, mat.seed);
+
+    mat.slime_chunks.indexed_iter().for_each(|((dz, dx), value)| {
+        let (x, z) = (x + dx as i32, z + dz as i32);
+
+        let res = is_slimechunk(seed, x, z);
+        assert_eq!(*value, res, "[s1.txt] is_slimechunk({seed}, {x}, {z}). Expected: {value}. Got {res}")
+    });
+
+    Ok(())
+}
+
+#[test]
+fn slime_chunk_s2() -> Result<()> {
+    let mat = load_file("s2.txt")?;
+    let (x, z, seed) = (mat.x, mat.z, mat.seed);
+
+    mat.slime_chunks.indexed_iter().for_each(|((dz, dx), value)| {
+        let (x, z) = (x + dx as i32, z + dz as i32);
+
+        let res = is_slimechunk(seed, x, z);
+        assert_eq!(*value, res, "[s2.txt] is_slimechunk({seed}, {x}, {z}). Expected: {value}. Got {res}")
+    });
+
+    Ok(())
+}
+
+#[test]
+fn slime_chunk_s3() -> Result<()> {
+    let mat = load_file("s3.txt")?;
+    let (x, z, seed) = (mat.x, mat.z, mat.seed);
+
+    mat.slime_chunks.indexed_iter().for_each(|((dz, dx), value)| {
+        let (x, z) = (x + dx as i32, z + dz as i32);
+
+        let res = is_slimechunk(seed, x, z);
+        assert_eq!(*value, res, "[s3.txt] is_slimechunk({seed}, {x}, {z}). Expected: {value}. Got {res}")
+    });
+
+    Ok(())
+}
