@@ -32,7 +32,8 @@ static PERLIN_SEEDS: Lazy<(i64, i64)> = Lazy::new(|| {
 const NUM_FLOWERS_TYPES: i32 = 11;
 
 #[derive(PartialEq, Debug)]
-pub enum Flower {
+/// Any flower that can naturally generate in a flower forest biome.
+pub enum FlowerForestFlower {
     Dandelion,
     Poppy,
     Allium,
@@ -47,7 +48,7 @@ pub enum Flower {
 }
 
 /// Computes the flower at the given coordinate
-pub fn flower_at(p: Point3D) -> Flower {
+pub fn flower_at(p: Point3D) -> FlowerForestFlower {
     let noise1 = noise::perlin(
         noise::PointND::Point3D {
             x: (p.x as f64) * SCALE_1,
@@ -74,25 +75,26 @@ pub fn flower_at(p: Point3D) -> Flower {
     let flower_id = (val * NUM_FLOWERS_TYPES as f64).floor() as usize;
 
     match flower_id {
-        0 => Flower::Dandelion,
-        1 => Flower::Poppy,
-        2 => Flower::Allium,
-        3 => Flower::AzureBluet,
-        4 => Flower::RedTulip,
-        5 => Flower::OrangeTulip,
-        6 => Flower::WhiteTulip,
-        7 => Flower::PinkTulip,
-        8 => Flower::OxeyeDaisy,
-        9 => Flower::Cornflower,
-        10 => Flower::LilyOfTheValley,
+        0 => FlowerForestFlower::Dandelion,
+        1 => FlowerForestFlower::Poppy,
+        2 => FlowerForestFlower::Allium,
+        3 => FlowerForestFlower::AzureBluet,
+        4 => FlowerForestFlower::RedTulip,
+        5 => FlowerForestFlower::OrangeTulip,
+        6 => FlowerForestFlower::WhiteTulip,
+        7 => FlowerForestFlower::PinkTulip,
+        8 => FlowerForestFlower::OxeyeDaisy,
+        9 => FlowerForestFlower::Cornflower,
+        10 => FlowerForestFlower::LilyOfTheValley,
         _ => unreachable!(),
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{util::Point3D, flowers::Flower};
-    use super::flower_at;
+    use crate::util::Point3D;
+    use crate::rand::flower_at;
+    use crate::rand::FlowerForestFlower;
 
     #[test]
     fn test_flower_at_1() {
@@ -102,7 +104,7 @@ mod test {
             z: 103
         };
 
-        assert_eq!(flower_at(p), Flower::RedTulip)
+        assert_eq!(flower_at(p), FlowerForestFlower::RedTulip)
     }
 
     #[test]
@@ -113,7 +115,7 @@ mod test {
             z: 122
         };
 
-        assert_eq!(flower_at(p), Flower::Allium)
+        assert_eq!(flower_at(p), FlowerForestFlower::Allium)
     }
 
     #[test]
@@ -124,7 +126,7 @@ mod test {
             z: -126
         };
 
-        assert_eq!(flower_at(p), Flower::Allium)
+        assert_eq!(flower_at(p), FlowerForestFlower::Allium)
     }
 
     #[test]
@@ -135,7 +137,7 @@ mod test {
             z: 1
         };
 
-        assert_eq!(flower_at(p), Flower::OrangeTulip)
+        assert_eq!(flower_at(p), FlowerForestFlower::OrangeTulip)
     }
 
     #[test]
@@ -146,7 +148,7 @@ mod test {
             z: 1
         };
 
-        assert_eq!(flower_at(p), Flower::OrangeTulip)
+        assert_eq!(flower_at(p), FlowerForestFlower::OrangeTulip)
     }
 
     #[test]
@@ -157,7 +159,7 @@ mod test {
             z: 41
         };
 
-        assert_eq!(flower_at(p), Flower::OrangeTulip)
+        assert_eq!(flower_at(p), FlowerForestFlower::OrangeTulip)
     }
 
     #[test]
@@ -168,6 +170,6 @@ mod test {
             z: 23
         };
 
-        assert_eq!(flower_at(p), Flower::OrangeTulip)
+        assert_eq!(flower_at(p), FlowerForestFlower::OrangeTulip)
     }
 }

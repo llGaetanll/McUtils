@@ -19,14 +19,9 @@ pub mod util;
 pub mod cmd;
 
 /**
- * Contains all functions dealing with slime chunks
- */
-pub mod slime;
-
-/**
-* Contains helpers for working with flowers
+* For any random functions.
 */
-pub mod flowers;
+pub mod rand;
 
 /**
  * Testing reading nbt
