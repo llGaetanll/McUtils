@@ -1,6 +1,7 @@
 mod noise;
 
 use crate::util::Point3D;
+use once_cell::sync::Lazy;
 
 /// NOTE: For Minecraft versions prior to 1.18, the simplex noise algorithm was used to compute
 /// flower positions. The current implementation only implements perlin noise, which is correct for
@@ -12,10 +13,21 @@ const SCALE_1: f64 = 0.02083333395421505;
 const SCALE_2: f64 = SCALE_1 * 1.0181268882175227;
 const PERLIN_AMPLITUDE: f64 = 0.8333333333333333;
 
+const OCTAVE_HASHCODE: i64 = 1261148513;
+
 // these seeds are the first 2 nextLong calls of new Random(global_flower_seed) (for 2345: -1223197305642693068, -8087649459364435462)
-// TODO: have these values automatically calculated from global_flower_seed
-const PERLIN_SEED_1: i64 = -1223197304453310635;
-const PERLIN_SEED_2: i64 = -8087649458443489125;
+// then xor with "octave_0".hashCode() (1261148513)
+static PERLIN_SEEDS: Lazy<(i64, i64)> = Lazy::new(|| {
+    let mut rnd = java_rand::Random::new(FLOWER_SEED);
+
+    let seed1 = rnd.next_i64();
+    let seed2 = rnd.next_i64();
+
+    assert_eq!(seed1, -1223197305642693068);
+    assert_eq!(seed2, -8087649459364435462);
+
+    (seed1 ^ OCTAVE_HASHCODE, seed2 ^ OCTAVE_HASHCODE)
+});
 
 const NUM_FLOWERS_TYPES: i32 = 11;
 
@@ -42,7 +54,7 @@ pub fn flower_at(p: Point3D) -> Flower {
             y: (p.y as f64) * SCALE_1,
             z: (p.z as f64) * SCALE_1,
         },
-        Some(PERLIN_SEED_1),
+        Some(PERLIN_SEEDS.0),
     );
 
     let noise2 = noise::perlin(
@@ -51,7 +63,7 @@ pub fn flower_at(p: Point3D) -> Flower {
             y: (p.y as f64) * SCALE_2,
             z: (p.z as f64) * SCALE_2,
         },
-        Some(PERLIN_SEED_2),
+        Some(PERLIN_SEEDS.1),
     );
 
     let val = (noise1 + noise2) * PERLIN_AMPLITUDE - PERLIN_AMPLITUDE + 0.5;
