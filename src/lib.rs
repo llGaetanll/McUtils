@@ -24,6 +24,11 @@ pub mod cmd;
 pub mod slime;
 
 /**
+* Contains helpers for working with flowers
+*/
+pub mod flowers;
+
+/**
  * Testing reading nbt
  */
 pub mod nbt;
