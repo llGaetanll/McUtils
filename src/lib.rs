@@ -24,6 +24,11 @@ pub mod cmd;
 pub mod rand;
 
 /**
+* For conversion utilities
+*/
+pub mod convert;
+
+/**
  * Testing reading nbt
  */
 pub mod nbt;

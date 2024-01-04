@@ -1,15 +1,19 @@
-/**
- * This module abstracts away in game commands into callable functions.
- **/
+use crate::util::{Point3D, BlockPoint, FlatPoint, consts};
 
-// for now import every type
-use crate::util::*;
+///
+/// This module abstracts away in game commands into callable functions.
+///
+
+
+pub type Block = str;
+pub type Command = String;
+pub type CmdParams = Option<String>;
 
 /**
     * returns a stringified setblock command given the block coordinate, type, and optional
     * parameters
     **/ 
-pub fn setblock(p: &Point3D, block: &Block, params: CmdParams) -> Command {
+pub fn setblock(p: &BlockPoint, block: &Block, params: CmdParams) -> Command {
     let params = params.unwrap_or("".to_string());
 
     format!("setblock {} {} {} {}{}", p.x, p.y, p.z, block, params)
@@ -19,7 +23,7 @@ pub fn setblock(p: &Point3D, block: &Block, params: CmdParams) -> Command {
     * returns a stringified fill command given two block coordinates, a block type, and optional
     * parameters
     **/ 
-pub fn fill(p1: &Point3D, p2: &Point3D, block: &Block, params: CmdParams) -> Command {
+pub fn fill(p1: &BlockPoint, p2: &BlockPoint, block: &Block, params: CmdParams) -> Command {
     let params = params.unwrap_or("".to_string());
 
     format!("fill {} {} {} {} {} {} {}{}", p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, block, params)
@@ -30,7 +34,7 @@ pub fn fill(p1: &Point3D, p2: &Point3D, block: &Block, params: CmdParams) -> Com
     * returns a set of commands to generate 1 high walls given a center block, a sidelength, and a
     * block type
     **/ 
-pub fn walls_2d(c: &Point3D, sidelength: i32, block: &Block) -> Vec<Command> {
+pub fn walls_2d(c: &BlockPoint, sidelength: i32, block: &Block) -> Vec<Command> {
     let mut cmds = Vec::new();
 
     let l = sidelength / 2;
@@ -52,19 +56,20 @@ pub fn walls_2d(c: &Point3D, sidelength: i32, block: &Block) -> Vec<Command> {
     * returns a set of commands to generate walls given a center block, a sidelength, and a
     * block type. The walls extend from the bottom to the top of the world
     **/ 
-pub fn walls_3d(c: &Point2D, sidelength: i32, block: &Block) -> Vec<Command> {
+pub fn walls_3d(c: &FlatPoint<i32>, sidelength: i32, block: &Block) -> Vec<Command> {
     let mut cmds = Vec::new();
 
     let l = sidelength / 2;
     let verts = [
-        Point2D {x: c.x - l, z: c.z - l},
-        Point2D {x: c.x - l, z: c.z + l},
-        Point2D {x: c.x + l, z: c.z - l},
-        Point2D {x: c.x + l, z: c.z + l},
+        FlatPoint {x: c.x - l, z: c.z - l},
+        FlatPoint {x: c.x - l, z: c.z + l},
+        FlatPoint {x: c.x + l, z: c.z - l},
+        FlatPoint {x: c.x + l, z: c.z + l},
     ];
 
     for i in 0..verts.len() {
         // FIXME: bottom and top of the world have changed, use variables
+        // NOTE: these values depend on the dimension
         cmds.push(fill(&verts[i].to_3d(0), &verts[(i + 1) % 4].to_3d(255), block, None));
     }
 

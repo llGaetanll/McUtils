@@ -1,6 +1,6 @@
 mod noise;
 
-use crate::util::Point3D;
+use crate::util::{Point3D, BlockPoint};
 use once_cell::sync::Lazy;
 
 /// NOTE: For Minecraft versions prior to 1.18, the simplex noise algorithm was used to compute
@@ -48,7 +48,7 @@ pub enum FlowerForestFlower {
 }
 
 /// Computes the flower at the given coordinate
-pub fn flower_at(p: Point3D) -> FlowerForestFlower {
+pub fn flower_at(p: BlockPoint) -> FlowerForestFlower {
     let noise1 = noise::perlin(
         noise::PointND::Point3D {
             x: (p.x as f64) * SCALE_1,

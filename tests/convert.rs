@@ -1,8 +1,7 @@
 extern crate mc_utils;
 
 use std::collections::HashMap;
-
-use mc_utils::util::{Denominable};
+use mc_utils::convert::Denomination;
 
 #[test]
 fn test_space() {
