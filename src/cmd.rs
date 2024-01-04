@@ -1,4 +1,4 @@
-use crate::util::{Point3D, BlockPoint, FlatPoint, consts};
+use crate::util::{Point3D, BlockPoint, FlatPoint};
 
 ///
 /// This module abstracts away in game commands into callable functions.
@@ -81,9 +81,9 @@ pub fn walls_3d(c: &FlatPoint<i32>, sidelength: i32, block: &Block) -> Vec<Comma
     **/ 
 fn esc(c: &Command) -> String {
     c
-        .replace("\"", "\\\"")  // " -> \"
-        .replace("'", "\\'")    // ' -> \'
-        .replace("\\", "\\\\")  // \ -> \\
+        .replace('\"', "\\\"")  // " -> \"
+        .replace('\'', "\\'")    // ' -> \'
+        .replace('\\', "\\\\")  // \ -> \\
 }
 
 /**
