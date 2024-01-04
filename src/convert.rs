@@ -25,7 +25,7 @@ fn to_denom(col: Vec<i32>, n: i32) -> Vec<i32> {
     let mut cum_col = vec![];
     let mut t = 1;
     for c in col {
-        t = t * c;
+        t *= c;
         cum_col.push(t);
     }
 
@@ -38,7 +38,7 @@ fn to_denom(col: Vec<i32>, n: i32) -> Vec<i32> {
     for cum_c in cum_col {
         grouped.push(v / cum_c);
 
-        v = v % cum_c;
+        v %= cum_c;
     }
 
     // add final remainder
@@ -70,7 +70,7 @@ impl Denomination for i32 {
         }
 
         // edge case
-        if quants.len() == 0 {
+        if quants.is_empty() {
             quants.push("0 items".to_owned());
         }
 
@@ -100,7 +100,7 @@ impl Denomination for i32 {
         }
 
         // edge case
-        if quants.len() == 0 {
+        if quants.is_empty() {
             quants.push("0 seconds".to_owned());
         }
 

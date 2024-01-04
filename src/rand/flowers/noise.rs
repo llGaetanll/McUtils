@@ -1,4 +1,4 @@
-use num_traits::Num;
+use crate::util::Point3D;
 
 /// This module provides feature parity with Minecraft's perlin noise sampler.
 /// see: https://github.com/gnembon/fabric-carpet/blob/dd381a84479cd8d5c9e931897d3d06e6768c5c4e/src/main/java/carpet/script/utils/PerlinNoiseSampler.java
@@ -26,12 +26,6 @@ mod perlin {
             [-1, 1, 0],
             [0, -1, -1],
         ];
-
-        grad.map(|vec| vec.map(Wrapping))
-    });
-
-    static GRADIENTS_2D: Lazy<[[Wrapping<i32>; 2]; 4]> = Lazy::new(|| {
-        let grad: [[i32; 2]; 4] = [[1, 1], [-1, 1], [1, -1], [-1, -1]];
 
         grad.map(|vec| vec.map(Wrapping))
     });
@@ -255,31 +249,22 @@ mod perlin {
     }
 }
 
-pub enum PointND<T: Num> {
-    Point3D { x: T, y: T, z: T },
-    Point2D { x: T, y: T },
-    Point1D { x: T },
-}
-
-pub fn perlin(p: PointND<f64>, seed: Option<i64>) -> f64 {
+pub fn perlin(p: Point3D<f64>, seed: Option<i64>) -> f64 {
     let sampler = perlin::Sampler::new(seed);
 
-    match p {
-        PointND::Point3D { x, y, z } => sampler.sample_3d(x, y, z),
-        PointND::Point2D { x, y } => unimplemented!(),
-        PointND::Point1D { x } => unimplemented!(),
-    }
+    sampler.sample_3d(p.x, p.y, p.z)
 }
 
 #[cfg(test)]
 mod test {
-    use super::{perlin, PointND};
+    use super::perlin;
+    use crate::util::Point3D;
 
     #[test]
     fn test_noise_rand_1() {
         assert_eq!(
             perlin(
-                PointND::Point3D {
+                Point3D {
                     x: 12.0,
                     y: 1.0,
                     z: 16.0
@@ -294,7 +279,7 @@ mod test {
     fn test_noise_rand_2() {
         assert_eq!(
             perlin(
-                PointND::Point3D {
+                Point3D {
                     x: -3.0,
                     y: 54.0,
                     z: 10.0,
@@ -309,7 +294,7 @@ mod test {
     fn test_noise_rand_3() {
         assert_eq!(
             perlin(
-                PointND::Point3D {
+                Point3D {
                     x: 432.0,
                     y: -43.0,
                     z: 23.0
@@ -324,7 +309,7 @@ mod test {
     fn test_noise_rand_4() {
         assert_eq!(
             perlin(
-                PointND::Point3D {
+                Point3D {
                     x: -30.0,
                     y: 120.0,
                     z: -3130.0,
