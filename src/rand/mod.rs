@@ -20,6 +20,7 @@ pub mod flowers;
 /// Contains utilities for predicting bedrock generation patterns.
 /// 
 pub mod bedrock;
+pub mod bedrock_new;
 
 // re-exports
 pub use slime::is_slimechunk;

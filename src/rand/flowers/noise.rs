@@ -7,6 +7,8 @@ mod perlin {
     use once_cell::sync::Lazy;
     use std::{array::from_fn, num::Wrapping};
 
+    use crate::util::Point3D;
+
     static GRADIENTS_3D: Lazy<[[Wrapping<i32>; 3]; 16]> = Lazy::new(|| {
         let grad: [[i32; 3]; 16] = [
             [1, 1, 0],
@@ -82,10 +84,10 @@ mod perlin {
             }
         }
 
-        pub fn sample_3d(&self, x: f64, y: f64, z: f64) -> f64 {
-            let f = x + self.origin_x;
-            let g = y + self.origin_y;
-            let h = z + self.origin_z;
+        pub fn sample_3d(&self, p: Point3D<f64>) -> f64 {
+            let f = p.x + self.origin_x;
+            let g = p.y + self.origin_y;
+            let h = p.z + self.origin_z;
 
             let i = f.floor();
             let j = g.floor();
@@ -106,73 +108,79 @@ mod perlin {
             // println!("l: {l}, m: {m}, n: {n}");
             // println!("o: {o}, p: {p}, q: {q}");
 
+            let section = Point3D {
+                x: Wrapping(i as i32),
+                y: Wrapping(j as i32),
+                z: Wrapping(k as i32),
+            };
+
+            let local = Point3D {
+                x: l,
+                y: m,
+                z: n,
+            };
+
+            let fade_local = Point3D {
+                x: o,
+                y: p,
+                z: q,
+            };
+
             self.sample_3d_helper(
-                Wrapping(i as i32),
-                Wrapping(j as i32),
-                Wrapping(k as i32),
-                l,
-                m,
-                n,
-                o,
-                p,
-                q,
+                section,
+                local,
+                fade_local,
             ) / 2f64
                 + 0.5
         }
 
         fn sample_3d_helper(
             &self,
-            section_x: Wrapping<i32>,
-            section_y: Wrapping<i32>,
-            section_z: Wrapping<i32>,
-            local_x: f64,
-            local_y: f64,
-            local_z: f64,
-            fade_local_x: f64,
-            fade_local_y: f64,
-            fade_local_z: f64,
+            section: Point3D<Wrapping<i32>>,
+            local: Point3D<f64>,
+            fade_local: Point3D<f64>,
         ) -> f64 {
-            let i = self.get_gradient(section_x) + section_y;
-            let j = self.get_gradient(i) + section_z;
-            let k = self.get_gradient(i + Wrapping(1i32)) + section_z;
+            let i = self.get_gradient(section.x) + section.y;
+            let j = self.get_gradient(i) + section.z;
+            let k = self.get_gradient(i + Wrapping(1i32)) + section.z;
 
-            let l = self.get_gradient(section_x + Wrapping(1i32)) + section_y;
-            let m = self.get_gradient(l) + section_z;
-            let n = self.get_gradient(l + Wrapping(1i32)) + section_z;
+            let l = self.get_gradient(section.x + Wrapping(1i32)) + section.y;
+            let m = self.get_gradient(l) + section.z;
+            let n = self.get_gradient(l + Wrapping(1i32)) + section.z;
 
-            let d = Self::grad_3d(self.get_gradient(j), local_x, local_y, local_z);
-            let e = Self::grad_3d(self.get_gradient(m), local_x - 1f64, local_y, local_z);
-            let f = Self::grad_3d(self.get_gradient(k), local_x, local_y - 1f64, local_z);
+            let d = Self::grad_3d(self.get_gradient(j), local.x, local.y, local.z);
+            let e = Self::grad_3d(self.get_gradient(m), local.x - 1f64, local.y, local.z);
+            let f = Self::grad_3d(self.get_gradient(k), local.x, local.y - 1f64, local.z);
 
             let g = Self::grad_3d(
                 self.get_gradient(n),
-                local_x - 1f64,
-                local_y - 1f64,
-                local_z,
+                local.x - 1f64,
+                local.y - 1f64,
+                local.z,
             );
             let h = Self::grad_3d(
                 self.get_gradient(j + Wrapping(1i32)),
-                local_x,
-                local_y,
-                local_z - 1f64,
+                local.x,
+                local.y,
+                local.z - 1f64,
             );
             let o = Self::grad_3d(
                 self.get_gradient(m + Wrapping(1i32)),
-                local_x - 1f64,
-                local_y,
-                local_z - 1f64,
+                local.x - 1f64,
+                local.y,
+                local.z - 1f64,
             );
             let p = Self::grad_3d(
                 self.get_gradient(k + Wrapping(1i32)),
-                local_x,
-                local_y - 1f64,
-                local_z - 1f64,
+                local.x,
+                local.y - 1f64,
+                local.z - 1f64,
             );
             let q = Self::grad_3d(
                 self.get_gradient(n + Wrapping(1i32)),
-                local_x - 1f64,
-                local_y - 1f64,
-                local_z - 1f64,
+                local.x - 1f64,
+                local.y - 1f64,
+                local.z - 1f64,
             );
 
             // println!("--- sample_3d_helper ---");
@@ -182,9 +190,7 @@ mod perlin {
             // println!("g: {g}, h: {h}, o: {o}, p: {p}, q: {q}");
 
             Self::lerp3(
-                fade_local_x,
-                fade_local_y,
-                fade_local_z,
+                fade_local,
                 d,
                 e,
                 f,
@@ -205,8 +211,8 @@ mod perlin {
             ((grad[0].0 as f64) * x) + ((grad[1].0 as f64) * y) + ((grad[2].0 as f64) * z)
         }
 
-        fn lerp(delta: f64, first: f64, second: f64) -> f64 {
-            first + delta * (second - first)
+        fn lerp(delta: f64, p1: f64, p2: f64) -> f64 {
+            p1 + delta * (p2 - p1)
         }
 
         fn lerp2(delta_x: f64, delta_y: f64, d: f64, e: f64, f: f64, g: f64) -> f64 {
@@ -218,9 +224,7 @@ mod perlin {
         }
 
         fn lerp3(
-            delta_x: f64,
-            delta_y: f64,
-            delta_z: f64,
+            delta: Point3D<f64>,
             d: f64,
             e: f64,
             f: f64,
@@ -231,9 +235,9 @@ mod perlin {
             k: f64,
         ) -> f64 {
             Self::lerp(
-                delta_z,
-                Self::lerp2(delta_x, delta_y, d, e, f, g),
-                Self::lerp2(delta_x, delta_y, h, i, j, k),
+                delta.z,
+                Self::lerp2(delta.x, delta.y, d, e, f, g),
+                Self::lerp2(delta.x, delta.y, h, i, j, k),
             )
         }
 
@@ -252,7 +256,7 @@ mod perlin {
 pub fn perlin(p: Point3D<f64>, seed: Option<i64>) -> f64 {
     let sampler = perlin::Sampler::new(seed);
 
-    sampler.sample_3d(p.x, p.y, p.z)
+    sampler.sample_3d(p)
 }
 
 #[cfg(test)]
