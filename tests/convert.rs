@@ -39,3 +39,13 @@ fn test_time() {
         assert_eq!(output, input.to_time())
     }
 }
+
+#[test]
+fn test_time_2() {
+    let sl = 10_000;
+    let area = sl * sl;
+    let time = area / 2;
+
+    println!("{}", time.to_time());
+    panic!()
+}

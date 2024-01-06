@@ -1,8 +1,8 @@
-use std::{fmt::Debug, ops::{Sub, Add, Mul, Div}};
+use std::fmt::Debug;
 
 use num_traits::Num;
 
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Point3D<T: Num> {
     pub x: T,
     pub y: T,
@@ -61,7 +61,7 @@ impl From<ChunkPoint> for BlockPoint {
 
 /// `i32`s are required to access any chunk coordinate in the world. The sidelength of the
 /// Minecraft world spans `3.75` million chunks.
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct ChunkPoint {
     x: i32,
     z: i32
