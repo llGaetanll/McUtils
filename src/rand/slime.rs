@@ -1,3 +1,5 @@
+use num_traits::{WrappingMul, WrappingAdd};
+
 /// Determines if a chunk is a slime chunk for a given `seed`, `x` chunk coordinate, and `y` chunk
 /// coordinate.
 ///
@@ -17,8 +19,15 @@ pub fn is_slimechunk(seed: i64, x: i32, z: i32) -> bool {
 
     let seed = seed ^ 0x3ad8025fi64;
 
-    let mut rnd = java_rand::Random::new(seed as u64);
-    rnd.next_i32_bound(10) == 0
+    // manual java rand 
+    let magic = 0x5DEECE66D;
+    let mask = (1 << 48) - 1;
+    let seed = (seed ^ magic) & mask;
+
+    let seed = seed.wrapping_mul(magic).wrapping_add(0xB) & mask;
+    let bits = (seed >> 17) as i32;
+
+    (bits % 10) == 0
 }
 
 #[cfg(test)]
