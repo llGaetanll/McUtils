@@ -1,5 +1,3 @@
-use num_traits::{WrappingMul, WrappingAdd};
-
 /// Determines if a chunk is a slime chunk for a given `seed`, `x` chunk coordinate, and `y` chunk
 /// coordinate.
 ///
