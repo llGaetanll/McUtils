@@ -23,6 +23,7 @@ pub mod bedrock;
 
 // re-exports
 pub use slime::is_slimechunk;
+pub use slime::is_slimechunk_inline;
 
 pub use flowers::flower_at;
 pub use flowers::FlowerForestFlower;

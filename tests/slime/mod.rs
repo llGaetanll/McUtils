@@ -1,4 +1,5 @@
 use mc_utils::rand::is_slimechunk;
+use mc_utils::rand::slime::is_slimechunk_emma;
 
 use ndarray::Array1;
 use ndarray::Array2;
@@ -87,7 +88,7 @@ fn slime_chunk_s1() -> Result<()> {
     mat.slime_chunks.indexed_iter().for_each(|((dz, dx), value)| {
         let (x, z) = (x + dx as i32, z + dz as i32);
 
-        let res = is_slimechunk(seed, x, z);
+        let res = is_slimechunk_emma(seed, x, z);
         assert_eq!(*value, res, "[s1.txt] is_slimechunk({seed}, {x}, {z}). Expected: {value}. Got {res}")
     });
 
@@ -102,7 +103,7 @@ fn slime_chunk_s2() -> Result<()> {
     mat.slime_chunks.indexed_iter().for_each(|((dz, dx), value)| {
         let (x, z) = (x + dx as i32, z + dz as i32);
 
-        let res = is_slimechunk(seed, x, z);
+        let res = is_slimechunk_emma(seed, x, z);
         assert_eq!(*value, res, "[s2.txt] is_slimechunk({seed}, {x}, {z}). Expected: {value}. Got {res}")
     });
 
@@ -117,7 +118,7 @@ fn slime_chunk_s3() -> Result<()> {
     mat.slime_chunks.indexed_iter().for_each(|((dz, dx), value)| {
         let (x, z) = (x + dx as i32, z + dz as i32);
 
-        let res = is_slimechunk(seed, x, z);
+        let res = is_slimechunk_emma(seed, x, z);
         assert_eq!(*value, res, "[s3.txt] is_slimechunk({seed}, {x}, {z}). Expected: {value}. Got {res}")
     });
 

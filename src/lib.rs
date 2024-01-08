@@ -27,3 +27,5 @@ pub mod rand;
 * For conversion utilities
 */
 pub mod convert;
+
+pub mod alg;

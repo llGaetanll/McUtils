@@ -1,8 +1,8 @@
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
 use num_traits::Num;
 
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Point3D<T: Num> {
     pub x: T,
     pub y: T,
@@ -30,6 +30,12 @@ impl Debug for BlockPoint {
     }
 }
 
+impl Display for BlockPoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Block(x: {}, y: {}, z: {})", self.x, self.y, self.z)
+    }
+}
+
 impl From<ChunkPoint> for BlockPoint {
     /// Convert from a `ChunkPoint` to a `BlockPoint`. The `y` value is converted to `0`.
     fn from(value: ChunkPoint) -> Self {
@@ -43,13 +49,19 @@ impl From<ChunkPoint> for BlockPoint {
 
 /// `i32`s are required to access any chunk coordinate in the world. The sidelength of the
 /// Minecraft world spans `3.75` million chunks.
-#[derive(Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct ChunkPoint {
-    x: i32,
-    z: i32
+    pub x: i32,
+    pub z: i32
 }
 
 impl Debug for ChunkPoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Chunk(x: {}, z: {})", self.x, self.z)
+    }
+}
+
+impl Display for ChunkPoint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Chunk(x: {}, z: {})", self.x, self.z)
     }
