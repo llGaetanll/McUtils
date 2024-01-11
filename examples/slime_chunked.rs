@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use mc_utils::alg::slime::search_rect_par;
+use mc_utils::alg::slime::search_rect_chunked;
 use mc_utils::util::ChunkPoint;
 
 use num_format::Locale;
@@ -18,7 +18,7 @@ fn main() {
     let height = 16;
 
     let t0 = SystemTime::now();
-    let res = search_rect_par(seed, start, end, width, height);
+    let res = search_rect_chunked(seed, start, end, width, height);
     let t1 = SystemTime::now();
 
     println!("{}", res);

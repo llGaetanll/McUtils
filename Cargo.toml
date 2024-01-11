@@ -24,3 +24,12 @@ rand = "0.8"
 [[bench]]
 name = "slime"
 harness = false
+
+[profile.release]
+strip = "symbols"
+opt-level = 3
+codegen-units = 1
+lto = false
+
+[build]
+rustflags = ["-C", "target-cpu=native"]

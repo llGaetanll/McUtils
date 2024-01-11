@@ -1,6 +1,4 @@
-use std::time::SystemTime;
-
-use ndarray::{Array2, Axis};
+use ndarray::Array2;
 
 use crate::rand::is_slimechunk;
 use crate::util::ChunkPoint;
@@ -29,30 +27,11 @@ pub fn search_rect(
 
     assert!(search_width * search_height < usize::MAX);
 
-    let t0 = SystemTime::now();
-
-    // let mut c_mat: Array2<u32> = Array2::from_shape_fn((search_width + 1, search_height + 1), |(i, j)| ((i + 1) * (j + 1)) as u32);
-    // let mut c_mat: Array2<u32> =
-    //     Array2::from_shape_fn((search_width + 1, search_height + 1), |(i, j)| {
-    //         if is_slimechunk(seed, start.x + (i as i32 - 1), start.z + (j as i32 - 1)) {
-    //             1
-    //         } else {
-    //             0
-    //         }
-    //     });
-
-    // let t1 = SystemTime::now();
-
-    // c_mat.accumulate_axis_inplace(Axis(0), |&prev, curr| *curr += prev);
-    // c_mat.accumulate_axis_inplace(Axis(1), |&prev, curr| *curr += prev);
-
     // cumulative matrix
-    // TODO: check if this op is slow
     let mut c_mat: Array2<u32> = Array2::zeros((search_width + 1, search_height + 1));
 
-    let t1 = SystemTime::now();
-
     // can't be parallelized - order matters
+    // TODO: zipping two strides might be faster?
     for i in 1..=search_width {
         for j in 1..=search_height {
             c_mat[[i, j]] = c_mat[[i - 1, j]] + c_mat[[i, j - 1]] - c_mat[[i - 1, j - 1]];
@@ -62,8 +41,6 @@ pub fn search_rect(
             }
         }
     }
-
-    let t2 = SystemTime::now();
 
     let mut max_slime = 0;
     let mut coords: (ChunkPoint, ChunkPoint) = (start, end);
@@ -91,12 +68,6 @@ pub fn search_rect(
         }
     }
 
-    let t3 = SystemTime::now();
-
-    println!("zeroing memory: {:?}", t1.duration_since(t0).unwrap());
-    println!("setting cmap: {:?}", t2.duration_since(t1).unwrap());
-    println!("finding best area: {:?}", t3.duration_since(t2).unwrap());
-
     SearchResult {
         seed,
         p1: coords.0,
@@ -112,7 +83,7 @@ pub fn search_rect(
 /// matrix of `u32`s, but the number can be adjusted based on the user's computer memory.
 const CHUNK_SIZE: usize = 10_000;
 
-pub fn search_rect_par(
+pub fn search_rect_chunked(
     seed: i64,
     start: ChunkPoint,
     end: ChunkPoint,
